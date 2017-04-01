@@ -10,7 +10,6 @@ var request = require("request");
 //Require npm spotify package
 var spotify = require('spotify');
 
-
 //Takes command line arguments
 var nodeArgs = process.argv[2];
 
@@ -81,19 +80,23 @@ else if ( nodeArgs === "movie-this"){
 
 	else  {
 
-		request("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&r=json", function(error, response, body) {
+		request("http://www.omdbapi.com/?t=mr+nobody&y=&plot=short&tomatoes=true=json", function(error, response, data) {
 		  // If the request is successful (i.e. if the response status code is 200)
 			if (!error && response.statusCode === 200) {
 			    // Parse the body of the site and recover just the imdbRating
+			    var parseInfo = JSON.parse(data);
+			    // var tomatoes;
+	    		// parseInfo.tomatoRating === "N/A" ? tomatoes = movie.Ratings[1].Value : tomatoes = movie.tomatoRating;
 			    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-			    console.log( "The movie's title is: " + JSON.parse(body).Title); 
-			    console.log( "Year: " + JSON.parse(body).Year );
-			    console.log( "IMDB Rating " + JSON.parse(body).imdbRating);
-			    console.log( "Country: " + JSON.parse(body).Country);
-			    console.log( "Language: " + JSON.parse(body).Language );
-			    console.log( "Plot: " + JSON.parse(body).Plot);
-			    console.log( "Actors: " + JSON.parse(body).Actors);
-			    console.log( "Rotten Tomatoes: " + JSON.parse(body).Ratings.Source);
+			    console.log( "The movie's title is: " + paresInfo.Title); 
+			    console.log( "Year: " + paresInfo.Year );
+			    console.log( "IMDB Rating " + paresInfo.imdbRating);
+			    console.log( "Country: " + paresInfo.Country);
+			    console.log( "Language: " + paresInfo.Language );
+			    console.log( "Plot: " + paresInfo.Plot);
+			    console.log( "Actors: " + paresInfo.Actors);
+			    console.log( "Rotten Tomatoes: " + tomatoes);
+			    console.log("Rotten Tomatoes URL:");
 			}
 			   	// "Rotten Tomoatoes URL: " + JSON.parse(body).Actors 	
 		});
@@ -104,6 +107,7 @@ else if (nodeArgs === "spotify-this-song") {
 
 	var song = userInput;
 
+
  	spotify.search({ type: 'track', query: song }, function(err, data) {
 	    
 	    if ( err ) {
@@ -113,7 +117,17 @@ else if (nodeArgs === "spotify-this-song") {
 	        // return;
 	    }
 	    else {
-	    	console.log(data);
+	    	
+	    	var tracks = data.tracks.items[0];
+
+	    	var songDetails = "\nSong name : " + tracks.name 	    		 
+	    		+ "\nAlbum name : " + tracks.album.name
+	    		+ "\nArtist(s) : " + tracks.artists[0].name
+	    		+ "\nPreview link : " + tracks.preview_url;
+
+	        console.log(songDetails);
+	        // fs.appendFile("log.txt",songDetails);
+	        // return true;
 
 	    }
 	 
@@ -122,6 +136,17 @@ else if (nodeArgs === "spotify-this-song") {
 
 
 else {
+}
+
+//Read the text file and then use it to call one of LIRI's commands.
+function readText(){
+	fs.readFile("random.txt", "utf8", function(error, data) {
+		data = data.split(",");
+		var userInput = data[0];
+		var titleName = data[1];
+		userRequest(userInput,titleName);
+		return true;
+	});
 }
  
 
