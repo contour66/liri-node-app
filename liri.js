@@ -10,6 +10,8 @@ var request = require("request");
 //Require npm spotify package
 var spotify = require('spotify');
 
+var fs = require("fs");
+
 //Takes command line arguments
 var nodeArgs = process.argv[2];
 
@@ -33,14 +35,11 @@ if (nodeArgs === "my-tweets"){
 		
 	client.get('statuses/user_timeline', params, function(error, tweets, response) {
 		 
-		if (!error) {
-		  	
-		 	for (var i = 0; i < tweets.length; i++ ){
-		 		
+		if (!error) {		  	
+		 	for (var i = 0; i < tweets.length; i++ ){		 		
 		 		var date = tweets[i].created_at;
 		  	 	var text = tweets[i].text;
-		 
-		  		
+		 	  		
 		  		console.log(date);
 		  		console.log(text);
 		   	}
@@ -52,17 +51,19 @@ if (nodeArgs === "my-tweets"){
 	});
 }
 
-else if ( nodeArgs === "movie-this"){
-	//OMBD SSTARTS HERE
+if ( nodeArgs === "movie-this"){
+	//OMBD STARTS HERE
 	
 	// Then run a request to the OMDB API with the movie specified
 	var movie = userInput;
 		
 	if (movie){
 		
-		request("http://www.omdbapi.com/?t=" + movie + "&plot=short&r=json", function(error, response, body) {
+		request("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&tomatoes=true&r=json", function(error, response, body) {
 		  // If the request is successful (i.e. if the response status code is 200)
 			if (!error && response.statusCode === 200) {
+
+				var tomatoes;
 			    // Parse the body of the site and recover just the imdbRating
 			    // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
 			    console.log( "The movie's title is: " + JSON.parse(body).Title); 
@@ -72,7 +73,10 @@ else if ( nodeArgs === "movie-this"){
 			    console.log( "Language: " + JSON.parse(body).Language );
 			    console.log( "Plot: " + JSON.parse(body).Plot);
 			    console.log( "Actors: " + JSON.parse(body).Actors);
-			    console.log( "Rotten Tomatoes: " + JSON.parse(body).Ratings);   // fix ratings and url
+			    console.log( "Rotten Tomatoes: " + JSON.parse(body).Ratings);  
+
+
+			     // fix ratings and url
 			    	// "Rotten Tomoatoes URL: " + JSON.parse(body).Actors 
 		    }
 		});
@@ -102,12 +106,26 @@ else if ( nodeArgs === "movie-this"){
 		});
 	}
 }
+
+var spotSearch  = function (track) {
 	
-else if (nodeArgs === "spotify-this-song") {
+	var song;
 
-	var song = userInput;
+	var input = userInput;
 
+	if (track){
+		console.log("Callback worked");
+		song = track;
+	}
 
+	else {	
+		song = input;
+	}
+	
+		
+		// song = userInput;
+	
+ 	
  	spotify.search({ type: 'track', query: song }, function(err, data) {
 	    
 	    if ( err ) {
@@ -128,24 +146,31 @@ else if (nodeArgs === "spotify-this-song") {
 	        console.log(songDetails);
 	        // fs.appendFile("log.txt",songDetails);
 	        // return true;
-
 	    }
 	 
 	});
+
 }
 
+if (nodeArgs === "spotify-this-song") {
 
-else {
+	spotSearch();
 }
+
 
 //Read the text file and then use it to call one of LIRI's commands.
-function readText(){
+if (nodeArgs === "do-what-it-says"){
+	
+
 	fs.readFile("random.txt", "utf8", function(error, data) {
-		data = data.split(",");
-		var userInput = data[0];
-		var titleName = data[1];
-		userRequest(userInput,titleName);
-		return true;
+  		
+  		data = data.split(",");
+  		var track = data[1];
+  		console.log(track);
+
+
+  		spotSearch(track);
+  		// return true;
 	});
 }
  
